@@ -220,14 +220,14 @@ const T = {
   wake:"Say “Assalamualaikum” to wake me up.", ask:"I’m listening! Pick a word from the list below and ask me for it in Sundanese.",
   heard:"I heard: ", none:"I don’t know that word yet. Check the list below!", typeph:"Or type what you said here", send:"Send",
   norec:"Recording not added yet", nomic:"Speech recognition isn’t available in this browser. Use Chrome or type below.",
-  say:"in Sundanese", note:"Privacy note: your voice is only used to understand your question. This prototype does not save or upload any audio. Sundanese texts are placeholders until community speakers check and record them.",
+  say:"in Sundanese", note:"Privacy note: when you speak, Chrome's speech service sends your voice to Google to turn it into text. This app does not record or save your voice. When you finish a game, an anonymous score (no name) is saved. The Sundanese audio is a recording of a real speaker, and the words are examples for this prototype.",
   dTitle:"Recordings and images", dHelp:"Add real audio recorded by community speakers. Files stay in this browser tab only and disappear when you reload. Use Save to keep them in a file, and Load to bring them back.",
   imgIdle:"Idle image", imgListen:"Listening image", imgSpeak:"Speaking image", rec:"Record", stopRec:"Stop", up:"Upload", play:"Play", close:"Done", micDenied:"Microphone blocked. Upload a file instead.", greetLabel:"Greeting reply", look:"Look", lookTitle:"Change the look", mode:"Mode", auto:"Auto", light:"Light", dark:"Dark", titleColor:"Title color", accent:"Accent color", hi:"Highlight color", deco:"Sky decorations", calm:"Calm mode (no motion)", msize:"Mascot size", tsize:"Text size", reset:"Reset", words:"Words you can ask", sheetFail:"Could not split this image. Upload the three poses separately.", sheet:"Or upload one 3-pose sheet (left = idle, middle = listening, right = talking)"},
  id:{sub:"Ucapkan salam, lalu tanya kata dalam bahasa Sunda", start:"Mulai mendengarkan", stop:"Berhenti", repeat:"Ulangi", studio:"Rekaman",
   wake:"Ucapkan “Assalamualaikum” untuk membangunkanku.", ask:"Aku mendengarkan! Pilih kata dari daftar di bawah dan tanyakan padaku dalam bahasa Sunda.",
   heard:"Aku dengar: ", none:"Aku belum tahu kata itu. Lihat daftar di bawah!", typeph:"Atau ketik yang kamu ucapkan di sini", send:"Kirim",
   norec:"Rekaman belum ditambahkan", nomic:"Pengenalan suara tidak tersedia di browser ini. Pakai Chrome atau ketik di bawah.",
-  say:"dalam bahasa Sunda", note:"Catatan privasi: suaramu hanya dipakai untuk memahami pertanyaan. Prototipe ini tidak menyimpan atau mengunggah audio. Teks bahasa Sunda masih contoh sampai diperiksa dan direkam oleh penutur komunitas.",
+  say:"dalam bahasa Sunda", note:"Catatan privasi: saat kamu berbicara, layanan suara Chrome mengirim suaramu ke Google untuk diubah menjadi teks. Aplikasi ini tidak merekam atau menyimpan suaramu. Saat kamu selesai bermain, skor anonim (tanpa nama) disimpan. Audio bahasa Sunda adalah rekaman penutur asli, dan kata-katanya hanya contoh untuk prototipe ini.",
   dTitle:"Rekaman dan gambar", dHelp:"Tambahkan audio asli dari penutur komunitas. File hanya ada di tab ini dan hilang saat halaman dimuat ulang. Pakai Simpan untuk menyimpannya ke file, dan Muat untuk memanggilnya kembali.",
   imgIdle:"Gambar diam", imgListen:"Gambar mendengarkan", imgSpeak:"Gambar berbicara", rec:"Rekam", stopRec:"Berhenti", up:"Unggah", play:"Putar", close:"Selesai", micDenied:"Mikrofon diblokir. Unggah file saja.", greetLabel:"Balasan salam", look:"Tampilan", lookTitle:"Ubah tampilan", mode:"Mode", auto:"Otomatis", light:"Terang", dark:"Gelap", titleColor:"Warna judul", accent:"Warna aksen", hi:"Warna sorot", deco:"Hiasan langit", calm:"Mode tenang (tanpa gerak)", msize:"Ukuran maskot", tsize:"Ukuran teks", reset:"Atur ulang", words:"Kata yang bisa kamu tanya", sheetFail:"Gambar tidak bisa dipisah. Unggah ketiga pose satu per satu.", sheet:"Atau unggah satu lembar 3 pose (kiri = diam, tengah = mendengarkan, kanan = berbicara)"}
 };
@@ -653,6 +653,9 @@ function answer(ok,cur,btn,g){
   if(btn&&!ok) btn.classList.add('bad');
   const fb=$('quiz').querySelector('.heard'); fb.textContent=ok?q('right'):q('wrong')+' '+cur.en+' = '+cur.su;
   $('qmascot').src=ok?IMG.speak:IMG.idle;
+  /* after answering, show the written Sundanese word (and its meaning) in the bubble */
+  const hb=$('quiz').querySelector('.bubble');
+  if(hb){ hb.textContent=''; hb.append(el('div',{className:'big',textContent:cur.su}), el('div',{className:'sub',textContent:(lang==='en'?cur.en:(cur.ind||cur.en))})); }
   const last=z.idx===z.order.length-1;
   const nb=el('button',{className:'btn primary',type:'button',textContent:last?q('done'):q('next')});
   nb.onclick=()=>{ if(last) finish(); else { z.idx++; renderQ(); } };
