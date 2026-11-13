@@ -214,20 +214,21 @@ const PHRASES = [
   {id:"yes",     en:"yes",            ind:"ya",            su:"Muhun",            keys:["yes","yeah"]}
 ];
 const GREET = {id:"greet", su:"Waalaikumsalam"};
+const NOTE_DB = {}; /* privacy note text from the database (row with kind = note); falls back to the built-in text */
 
 const T = {
  en:{sub:"Say hello, then ask for a word in Sundanese", start:"Start listening", stop:"Stop", repeat:"Repeat", studio:"Recordings",
   wake:"Say “Assalamualaikum” to wake me up.", ask:"I’m listening! Pick a word from the list below and ask me for it in Sundanese.",
   heard:"I heard: ", none:"I don’t know that word yet. Check the list below!", typeph:"Or type what you said here", send:"Send",
   norec:"Recording not added yet", nomic:"Speech recognition isn’t available in this browser. Use Chrome or type below.",
-  say:"in Sundanese", note:"Privacy note: your voice is only used to understand your question. This prototype does not save or upload any audio. Sundanese texts are placeholders until community speakers check and record them.",
+  say:"in Sundanese", note:"Privacy note: when you speak, Chrome's speech service sends your voice to Google to turn it into text. This app does not record or save your voice. When you finish a game, an anonymous score (no name) is saved. The Sundanese audio is a recording of a real speaker, and the words are examples for this prototype.",
   dTitle:"Recordings and images", dHelp:"Add real audio recorded by community speakers. Files stay in this browser tab only and disappear when you reload. Use Save to keep them in a file, and Load to bring them back.",
   imgIdle:"Idle image", imgListen:"Listening image", imgSpeak:"Speaking image", rec:"Record", stopRec:"Stop", up:"Upload", play:"Play", close:"Done", micDenied:"Microphone blocked. Upload a file instead.", greetLabel:"Greeting reply", look:"Look", lookTitle:"Change the look", mode:"Mode", auto:"Auto", light:"Light", dark:"Dark", titleColor:"Title color", accent:"Accent color", hi:"Highlight color", deco:"Sky decorations", calm:"Calm mode (no motion)", msize:"Mascot size", tsize:"Text size", reset:"Reset", words:"Words you can ask", sheetFail:"Could not split this image. Upload the three poses separately.", sheet:"Or upload one 3-pose sheet (left = idle, middle = listening, right = talking)"},
  id:{sub:"Ucapkan salam, lalu tanya kata dalam bahasa Sunda", start:"Mulai mendengarkan", stop:"Berhenti", repeat:"Ulangi", studio:"Rekaman",
   wake:"Ucapkan “Assalamualaikum” untuk membangunkanku.", ask:"Aku mendengarkan! Pilih kata dari daftar di bawah dan tanyakan padaku dalam bahasa Sunda.",
   heard:"Aku dengar: ", none:"Aku belum tahu kata itu. Lihat daftar di bawah!", typeph:"Atau ketik yang kamu ucapkan di sini", send:"Kirim",
   norec:"Rekaman belum ditambahkan", nomic:"Pengenalan suara tidak tersedia di browser ini. Pakai Chrome atau ketik di bawah.",
-  say:"dalam bahasa Sunda", note:"Catatan privasi: suaramu hanya dipakai untuk memahami pertanyaan. Prototipe ini tidak menyimpan atau mengunggah audio. Teks bahasa Sunda masih contoh sampai diperiksa dan direkam oleh penutur komunitas.",
+  say:"dalam bahasa Sunda", note:"Catatan privasi: saat kamu berbicara, layanan suara Chrome mengirim suaramu ke Google untuk diubah menjadi teks. Aplikasi ini tidak merekam atau menyimpan suaramu. Saat kamu selesai bermain, skor anonim (tanpa nama) disimpan. Audio bahasa Sunda adalah rekaman penutur asli, dan kata-katanya hanya contoh untuk prototipe ini.",
   dTitle:"Rekaman dan gambar", dHelp:"Tambahkan audio asli dari penutur komunitas. File hanya ada di tab ini dan hilang saat halaman dimuat ulang. Pakai Simpan untuk menyimpannya ke file, dan Muat untuk memanggilnya kembali.",
   imgIdle:"Gambar diam", imgListen:"Gambar mendengarkan", imgSpeak:"Gambar berbicara", rec:"Rekam", stopRec:"Berhenti", up:"Unggah", play:"Putar", close:"Selesai", micDenied:"Mikrofon diblokir. Unggah file saja.", greetLabel:"Balasan salam", look:"Tampilan", lookTitle:"Ubah tampilan", mode:"Mode", auto:"Otomatis", light:"Terang", dark:"Gelap", titleColor:"Warna judul", accent:"Warna aksen", hi:"Warna sorot", deco:"Hiasan langit", calm:"Mode tenang (tanpa gerak)", msize:"Ukuran maskot", tsize:"Ukuran teks", reset:"Atur ulang", words:"Kata yang bisa kamu tanya", sheetFail:"Gambar tidak bisa dipisah. Unggah ketiga pose satu per satu.", sheet:"Atau unggah satu lembar 3 pose (kiri = diam, tengah = mendengarkan, kanan = berbicara)"}
 };
@@ -489,6 +490,7 @@ async function loadWords(){
     const words=r.data.filter(x=>x.kind==='word');
     if(words.length){ PHRASES.length=0; words.forEach(x=>PHRASES.push({id:x.id,en:x.en,ind:x.ind||'',su:x.su,keys:(x.keys&&x.keys.length)?x.keys:[String(x.en).toLowerCase()]})); }
     const g=r.data.find(x=>x.kind==='greeting'); if(g) GREET.su=g.su;
+    const nt=r.data.find(x=>x.kind==='note'); if(nt){ if(nt.en) NOTE_DB.en=nt.en; if(nt.ind) NOTE_DB.id=nt.ind; }
     r.data.forEach(x=>{ if(x.audio_path) recs[x.id]=audioUrl(x.audio_path); });
     applyLang();
   }catch(_){}
@@ -719,7 +721,7 @@ function applyLang(){
   document.documentElement.lang = lang;
   $("lang").textContent = lang==="en" ? "ID" : "EN";
   $("t-sub").textContent = t("sub"); lab($("repeat"),"rotate-ccw",t("repeat")); lab($("studio"),"audio-lines",t("studio")); lab($("look"),"palette",t("look"));
-  $("typed").placeholder=t("typeph"); lab($("send"),"send",t("send")); $("note").textContent=t("note");
+  $("typed").placeholder=t("typeph"); lab($("send"),"send",t("send")); $("note").textContent=(NOTE_DB[lang]||t("note"));
   syncStart(); if(!busy) prompt();
 }
 $("lang").onclick = () => { lang = lang==="en" ? "id" : "en"; applyLang(); };
