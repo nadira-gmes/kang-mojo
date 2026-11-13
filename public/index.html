@@ -99,6 +99,41 @@ select{border:2px solid var(--line);border-radius:12px;padding:6px 10px;backgrou
 body.admin #studio{display:inline-flex}
 #adminBox{margin:8px 0}
 #adminBox form.type{flex-wrap:wrap}
+
+/* ===== Play map (level path). Put background + characters in public/assets/ : play-bg.png, play-char-1.png, play-char-2.png, play-char-3.png ===== */
+#levels.playmap{
+ position:relative;overflow:hidden;padding-bottom:22px;
+ background:
+  url("assets/play-bg.png") center top/cover no-repeat,
+  radial-gradient(circle at 18% 6%, rgba(255,255,255,.9), transparent 55%),
+  linear-gradient(180deg,var(--sky-b),color-mix(in srgb,var(--coral) 22%,#fff));
+}
+.trail{position:relative;width:100%;max-width:360px;margin:40px auto 0}
+.trail .road{position:absolute;left:0;top:0;width:100%;height:100%;z-index:0;overflow:visible}
+.trail .seg{fill:none;stroke:color-mix(in srgb,var(--line) 40%,transparent);stroke-width:6;stroke-linecap:round;stroke-dasharray:1 13;vector-effect:non-scaling-stroke}
+.trail .seg.done{stroke:var(--coral);stroke-dasharray:none;stroke-width:9}
+.pchar{position:absolute;z-index:1;width:92px;height:auto;pointer-events:none}
+.nd{position:absolute;z-index:2;width:156px;margin-left:-78px;text-align:center}
+.nd .orb{
+ width:72px;height:72px;margin:0 auto;border-radius:50%;border:3px solid var(--line);padding:0;display:grid;place-items:center;
+ cursor:pointer;color:#fff;font:inherit;position:relative;isolation:isolate;
+ box-shadow:inset 0 -7px 0 rgba(29,16,51,.18),0 6px 0 var(--line);
+}
+.nd .orb svg{width:32px;height:32px;stroke-width:2.6}
+.nd.done .orb{background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.7),transparent 58%),var(--coral);color:#1d1033}
+.nd.cur .orb,.nd.open .orb{background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.7),transparent 58%),var(--brand)}
+.nd.cur .orb{animation:bob 1.7s ease-in-out infinite}
+.nd.lock .orb{background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.75),transparent 58%),#cfc8e0;color:#6a5f86;cursor:not-allowed;box-shadow:inset 0 -6px 0 rgba(29,16,51,.12),0 5px 0 rgba(29,16,51,.45)}
+.nd.chest .orb{border-radius:24px}
+.nd .orb:not(:disabled):active{transform:translateY(4px);box-shadow:inset 0 -7px 0 rgba(29,16,51,.18),0 2px 0 var(--line)}
+.nd .nm{font-weight:800;font-size:.85rem;line-height:1.1;margin-top:8px;text-shadow:0 0 5px #fff,0 0 5px #fff,0 0 8px #fff}
+.nd .sub2{font-size:.75rem;color:var(--muted);margin-top:2px;text-shadow:0 0 5px #fff,0 0 5px #fff}
+.nd .stars{font-size:.95rem;margin:3px 0 0}
+.nd.lock .nm{color:var(--muted)}
+.go{position:absolute;left:50%;top:-34px;transform:translateX(-50%);background:var(--surface);border:2.5px solid var(--line);border-radius:14px;padding:2px 12px;font-weight:800;font-size:.8rem;white-space:nowrap;color:var(--brand)}
+.go::after{content:"";position:absolute;left:50%;bottom:-8px;width:10px;height:10px;background:var(--surface);border-right:2.5px solid var(--line);border-bottom:2.5px solid var(--line);transform:translateX(-50%) rotate(45deg)}
+@keyframes bob{50%{transform:translateY(-6px)}}
+/* ===== END play map ===== */
 </style>
 <meta name="description" content="Kang Mojo: a voice-activated Bahasa Sunda word game for young learners.">
 <script src="vendor/lucide.min.js"></script>
@@ -514,8 +549,8 @@ $('loadFile').onchange=e=>{ const f=e.target.files[0]; if(f) loadAll(f); e.targe
 
 /* ---------- Play: levels and listening tests ---------- */
 const Q18={
- en:{tabTalk:'Talk',tabPlay:'Play',lvls:'Levels',lvlName:['Listen & Pick','Listen & Pick 2','Listen & Say'],lvlDesc:['Hear a Sundanese word, pick the English word (5 words)','All 10 words, more choices','Hear it, then say the English word'],locked:'Locked',play:'Play',listen:'Listen',next:'Next',done:'See score',of:'Question',score:'Score',again:'Try again',back:'Levels',pass:'Level passed!',unlock:' Next level unlocked.',fail:'Almost! Get at least 60% to unlock the next level.',right:'Correct!',wrong:'Not quite. It was',sayBtn:'Say it',heardQ:'I heard',noRec:'No recording yet. The Sundanese word is:',typeAns:'Or type the English word',mic:'Microphone problem',save:'Save',load:'Load',saved:'Saved! Keep the file safe.',loaded:'Loaded!',saveFail:'Could not save here. Try opening the page in its own tab.',loadFail:'That file could not be read.'},
- id:{tabTalk:'Bicara',tabPlay:'Main',lvls:'Level',lvlName:['Dengar & Pilih','Dengar & Pilih 2','Dengar & Ucapkan'],lvlDesc:['Dengar kata Sunda, pilih kata Inggrisnya (5 kata)','Semua 10 kata, lebih banyak pilihan','Dengar, lalu ucapkan kata Inggrisnya'],locked:'Terkunci',play:'Main',listen:'Dengarkan',next:'Lanjut',done:'Lihat skor',of:'Soal',score:'Skor',again:'Coba lagi',back:'Level',pass:'Level lulus!',unlock:' Level berikutnya terbuka.',fail:'Hampir! Dapatkan minimal 60% untuk membuka level berikutnya.',right:'Benar!',wrong:'Belum tepat. Jawabannya',sayBtn:'Ucapkan',heardQ:'Aku dengar',noRec:'Belum ada rekaman. Kata Sundanya:',typeAns:'Atau ketik kata Inggrisnya',mic:'Mikrofon bermasalah',save:'Simpan',load:'Muat',saved:'Tersimpan! Simpan file ini baik-baik.',loaded:'Berhasil dimuat!',saveFail:'Tidak bisa menyimpan di sini. Coba buka halaman di tab sendiri.',loadFail:'File itu tidak bisa dibaca.'}
+ en:{tabTalk:'Talk',tabPlay:'Play',lvls:'Levels',lvlName:['Listen & Pick','Listen & Pick 2','Listen & Say'],lvlDesc:['Hear a Sundanese word, pick the English word (5 words)','All 10 words, more choices','Hear it, then say the English word'],locked:'Locked',soon:'Coming soon',chest:'Bonus chest',lvlWord:'Level',startHere:'Start',play:'Play',listen:'Listen',next:'Next',done:'See score',of:'Question',score:'Score',again:'Try again',back:'Levels',pass:'Level passed!',unlock:' Next level unlocked.',fail:'Almost! Get at least 60% to unlock the next level.',right:'Correct!',wrong:'Not quite. It was',sayBtn:'Say it',heardQ:'I heard',noRec:'No recording yet. The Sundanese word is:',typeAns:'Or type the English word',mic:'Microphone problem',save:'Save',load:'Load',saved:'Saved! Keep the file safe.',loaded:'Loaded!',saveFail:'Could not save here. Try opening the page in its own tab.',loadFail:'That file could not be read.'},
+ id:{tabTalk:'Bicara',tabPlay:'Main',lvls:'Level',lvlName:['Dengar & Pilih','Dengar & Pilih 2','Dengar & Ucapkan'],lvlDesc:['Dengar kata Sunda, pilih kata Inggrisnya (5 kata)','Semua 10 kata, lebih banyak pilihan','Dengar, lalu ucapkan kata Inggrisnya'],locked:'Terkunci',soon:'Segera hadir',chest:'Peti bonus',lvlWord:'Level',startHere:'Mulai',play:'Main',listen:'Dengarkan',next:'Lanjut',done:'Lihat skor',of:'Soal',score:'Skor',again:'Coba lagi',back:'Level',pass:'Level lulus!',unlock:' Level berikutnya terbuka.',fail:'Hampir! Dapatkan minimal 60% untuk membuka level berikutnya.',right:'Benar!',wrong:'Belum tepat. Jawabannya',sayBtn:'Ucapkan',heardQ:'Aku dengar',noRec:'Belum ada rekaman. Kata Sundanya:',typeAns:'Atau ketik kata Inggrisnya',mic:'Mikrofon bermasalah',save:'Simpan',load:'Muat',saved:'Tersimpan! Simpan file ini baik-baik.',loaded:'Berhasil dimuat!',saveFail:'Tidak bisa menyimpan di sini. Coba buka halaman di tab sendiri.',loadFail:'File itu tidak bisa dibaca.'}
 };
 const q=k=>Q18[lang][k];
 let PROG={1:0,2:0,3:0}, QZ=null, qrec=null;
@@ -534,15 +569,46 @@ function showTab(tab){
 }
 $('tabTalk').onclick=()=>showTab('talk'); $('tabPlay').onclick=()=>showTab('play');
 function renderLevels(){
-  const box=$('levels'); box.innerHTML=''; box.hidden=false; $('quiz').hidden=true;
+  const box=$('levels'); box.innerHTML=''; box.hidden=false; box.classList.add('playmap'); $('quiz').hidden=true;
   box.append(el('h2',{textContent:q('lvls')}));
-  LV.forEach((L,i)=>{
-    const ok=unlocked(i), row=el('div',{className:'lvl'}), info=el('div',{});
-    info.append(el('b',{textContent:(i+1)+'. '+q('lvlName')[i]}), el('div',{className:'sub',textContent:q('lvlDesc')[i]}), starsEl(PROG[i+1]||0));
-    info.lastChild.style.fontSize='1.3rem';
-    const b=el('button',{className:'btn primary',type:'button',disabled:!ok}); lab(b,ok?'play':'lock',ok?q('play'):q('locked')); b.onclick=()=>startLevel(i);
-    row.append(info,b); box.append(row);
+  const ROW=150, XS=[50,66,72,66,50,34,28,34];
+  /* levels 1-3 are playable; the rest are locked placeholders for later */
+  const NODES=[{i:0},{i:1},{i:2},{soon:4},{soon:5},{chest:1},{soon:6},{soon:7}];
+  const cur=LV.findIndex((_,i)=>unlocked(i)&&!(PROG[i+1]>=1));
+  const trail=el('div',{className:'trail'}); trail.style.height=(NODES.length*ROW)+'px';
+  const NS='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(NS,'svg'); svg.setAttribute('class','road'); svg.setAttribute('viewBox','0 0 100 '+(NODES.length*ROW)); svg.setAttribute('preserveAspectRatio','none'); svg.setAttribute('aria-hidden','true');
+  const cy=k=>k*ROW+44;
+  for(let k=0;k<NODES.length-1;k++){
+    const x1=XS[k], x2=XS[k+1], y1=cy(k), y2=cy(k+1), m=(y1+y2)/2;
+    const path=document.createElementNS(NS,'path'); path.setAttribute('d','M'+x1+' '+y1+' C'+x1+' '+m+','+x2+' '+m+','+x2+' '+y2);
+    path.setAttribute('class','seg'+((NODES[k].i!==undefined&&PROG[NODES[k].i+1]>=1)?' done':'')); svg.append(path);
+  }
+  trail.append(svg);
+  /* character slots: put PNGs in public/assets/ named play-char-1.png, play-char-2.png, play-char-3.png */
+  [['1','left:0;top:'+(1*ROW+6)+'px'],['2','right:0;top:'+(4*ROW+16)+'px'],['3','left:0;top:'+(3*ROW+6)+'px']].forEach(([n,pos])=>{
+    const im=el('img',{className:'pchar',src:'assets/play-char-'+n+'.png',alt:''}); im.style.cssText=pos; im.onerror=()=>im.remove(); trail.append(im);
   });
+  NODES.forEach((N,k)=>{
+    let kind, icon, name, sub=null, ok=false, i=N.i;
+    if(i!==undefined){
+      ok=unlocked(i); const st=PROG[i+1]||0;
+      kind=!ok?'lock':(st>=1?'done':(i===cur?'cur':'open'));
+      icon=!ok?'lock':(st>=1?'check':'play'); name=(i+1)+'. '+q('lvlName')[i];
+      if(ok&&st>=1) sub=starsEl(st);
+    } else if(N.chest){ kind='lock chest'; icon='gift'; name=q('chest'); sub=el('div',{className:'sub2',textContent:q('soon')}); }
+    else { kind='lock'; icon='lock'; name=q('lvlWord')+' '+N.soon; sub=el('div',{className:'sub2',textContent:q('soon')}); }
+    const nd=el('div',{className:'nd '+kind}); nd.style.left=XS[k]+'%'; nd.style.top=(k*ROW+8)+'px';
+    if(kind==='cur') nd.append(el('div',{className:'go',textContent:q('startHere')}));
+    const orb=el('button',{className:'orb',type:'button',disabled:!ok,title:name});
+    orb.setAttribute('aria-label',name+(ok?'':', '+q('locked')));
+    const ic=document.createElement('i'); ic.setAttribute('data-lucide',icon); orb.append(ic);
+    if(ok) orb.onclick=()=>startLevel(i);
+    nd.append(orb, el('div',{className:'nm',textContent:name}));
+    if(sub) nd.append(sub);
+    trail.append(nd);
+  });
+  box.append(trail); queueIcons();
 }
 function startLevel(i){
   const L=LV[i], pool=PHRASES.slice(0,L.pool);
