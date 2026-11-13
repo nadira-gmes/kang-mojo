@@ -9,8 +9,6 @@
 <style>
 :root{--bg:#8fd3ff;--surface:#fff;--ink:#1d1033;--muted:#4a3b6b;--brand:#d62a80;--sun:#6ec6ff;--coral:#7ed957;--line:#1d1033;--sky-a:#8fd3ff;--sky-b:#d9f1ff;--sky-c:#ffeaf4;
  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1033;--surface:#2b1a4d;--ink:#fff4fa;--muted:#d3bff0;--brand:#ff8fc4;--line:#ff8fc4;--sky-a:#1d1033;--sky-b:#2f2a6b;--sky-c:#5a3a86;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1d1033;--surface:#2b1a4d;--ink:#fff4fa;--muted:#d3bff0;--brand:#ff8fc4;--line:#ff8fc4;--sky-a:#1d1033;--sky-b:#2f2a6b;--sky-c:#5a3a86;color-scheme:dark}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--sky-a) linear-gradient(var(--sky-a),var(--sky-b) 65%,var(--sky-c)) fixed;color:var(--ink);font-family:"Nunito",system-ui,sans-serif;font-size:calc(17px * var(--fs,1));line-height:1.5}
@@ -611,11 +609,11 @@ const PRE={
  candy:{n:['Candy','Permen'],l:['#ffc2dd','#ffe3ef','#fff4fa'],d:['#33102a','#5a1f4a','#7a2f66'],bl:'#d62a80',bd:'#ff8fc4',sun:'#8fd3ff',coral:'#b8f0a8'},
  forest:{n:['Forest','Hutan'],l:['#a8e6b0','#dcf7e0','#f4fff0'],d:['#0e2823','#1d4a3a','#2b6a52'],bl:'#1f7a4d',bd:'#6fe0a8',sun:'#7cc8f5',coral:'#ffd34e'}
 };
-const DEF={preset:'sky',mode:'auto',title:'',accent:'',hi:'',deco:true,calm:false,mascot:260,fs:1};
+const DEF={preset:'sky',mode:'light',title:'',accent:'',hi:'',deco:true,calm:false,mascot:260,fs:1};
 let S={...DEF};
 function loadLook(){ try{ Object.assign(S, JSON.parse(localStorage.getItem('ngobrol-look')||'{}')); }catch(_){} }
 function saveLook(){ try{ localStorage.setItem('ngobrol-look', JSON.stringify(S)); }catch(_){} }
-function isDark(){ return S.mode==='dark' || (S.mode==='auto' && matchMedia('(prefers-color-scheme: dark)').matches); }
+function isDark(){ return false; }
 function applyLook(){
   const p=PRE[S.preset]||PRE.sky, dark=isDark(), sky=dark?p.d:p.l, r=document.documentElement.style;
   const v={surface:dark?'#2b1a4d':'#fff', ink:dark?'#fff4fa':'#1d1033', muted:dark?'#d3bff0':'#4a3b6b', line:dark?'#ff8fc4':'#1d1033',
@@ -627,7 +625,6 @@ function applyLook(){
   document.body.classList.toggle('no-deco',!S.deco);
   document.body.classList.toggle('calm',S.calm);
 }
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ if(S.mode==='auto') applyLook(); });
 function el(tag,props,...kids){ const e=document.createElement(tag); Object.assign(e,props||{}); e.append(...kids); return e; }
 function buildLook(){
   const d=$('lookDlg'), upd=()=>{ saveLook(); applyLook(); }, p=PRE[S.preset]||PRE.sky;
@@ -635,8 +632,6 @@ function buildLook(){
   const pre=el('div',{className:'presets'});
   Object.keys(PRE).forEach(k=>{ const b=el('button',{className:'btn',type:'button',textContent:PRE[k].n[lang==='en'?0:1]}); b.setAttribute('aria-pressed',String(S.preset===k)); b.onclick=()=>{ S.preset=k; S.accent=S.hi=S.title=''; upd(); buildLook(); }; pre.append(b); });
   const grid=el('div',{className:'look-grid'});
-  const mode=el('select'); ['auto','light','dark'].forEach(m=>mode.append(new Option(t(m),m))); mode.value=S.mode; mode.onchange=()=>{ S.mode=mode.value; upd(); };
-  grid.append(el('label',{},t('mode'),mode));
   [['title','titleColor','#ff8fb8'],['accent','accent',p.bl],['hi','hi',p.sun]].forEach(([k,lbl,def])=>{
     const i=el('input',{type:'color',value:S[k]||def}); i.oninput=()=>{ S[k]=i.value; upd(); }; grid.append(el('label',{},t(lbl),i)); });
   [['deco','deco'],['calm','calm']].forEach(([k,lbl])=>{ const c=el('input',{type:'checkbox',checked:S[k]}); c.onchange=()=>{ S[k]=c.checked; upd(); }; grid.append(el('label',{},t(lbl),c)); });
